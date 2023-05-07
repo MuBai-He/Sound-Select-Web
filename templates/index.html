@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>音频播放与选择</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="container" id="audio-container">
+    <!-- 音频元素将被添加到这个容器中 -->
+</div>
+<div class="mt-3 d-flex align-items-center">
+    <label for="jump-to-index">跳转到音频索引：</label>
+    <input type="number" id="jump-to-index" class="form-control" min="0" max="{{ audio_files|length - 1 }}" step="1" style="width: 200px;">
+    <button id="jump" class="btn btn-primary ms-2">跳转</button>
+</div>
+
+
+<button id="load-more" class="btn btn-primary mt-3">加载更多</button>
+
+<script>
+    let audio_files = {{ audio_files|tojson }};
+    let options = {{ options|tojson }};
+    let audio_index;
+
+    function createAudioElement(audio_file, index) {
+        let audio_card = document.createElement('div');
+        audio_card.className = 'card mt-4';
+
+        let card_body = document.createElement('div');
+        card_body.className = 'card-body';
+
+        let audio = document.createElement('audio');
+        audio.controls = true;
+        audio.innerHTML = '您的浏览器不支持音频播放。';
+        audio.src = '{{ url_for("static", filename="audio") }}/' + encodeURIComponent(audio_file);
+        card_body.appendChild(audio);
+
+        let file_name = document.createElement('p');
+        file_name.textContent = '音频索引：'+index+' - 文件名：'+audio_file;
+        card_body.appendChild(file_name);
+
+        let form = document.createElement('form');
+        form.className = 'mt-3';
+
+        let form_group = document.createElement('div');
+        form_group.className = 'form-group';
+
+        let label = document.createElement('label');
+        label.htmlFor = audio_file;
+        label.textContent = '请选择声音来源：';
+        form_group.appendChild(label);
+
+        let select = document.createElement('select');
+        select.className = 'form-control';
+        select.id = audio_file;
+        select.addEventListener('change', function() {
+            saveSelection(select);
+        });
+
+        let default_option = document.createElement('option');
+        default_option.disabled = true;
+        default_option.selected = true;
+        default_option.textContent = '请选择';
+        select.appendChild(default_option);
+
+        options.forEach(function(option) {
+            let option_element = document.createElement('option');
+            option_element.value = option;
+            option_element.textContent = option;
+            select.appendChild(option_element);
+        });
+
+        form_group.appendChild(select);
+        form.appendChild(form_group);
+        card_body.appendChild(form);
+        audio_card.appendChild(card_body);
+
+        return audio_card;
+    }
+
+    function loadMoreAudio() {
+        let end_index = Math.min(audio_index + 10, audio_files.length);
+        for (; audio_index < end_index; audio_index++) {
+            let audio_element = createAudioElement(audio_files[audio_index], audio_index);
+            document.getElementById('audio-container').appendChild(audio_element);
+        }
+        // 将当前音频索引存储到localStorage
+        localStorage.setItem('audio_index', audio_index);
+    }
+    document.getElementById('jump').addEventListener('click', function() {
+        let jump_index = parseInt(document.getElementById('jump-to-index').value);
+        jump_index -= 5;
+        jump_index = Math.max(jump_index, 0);
+        const audio_files_length = audio_files.length - 1;
+        jump_index = Math.min(jump_index, audio_files_length);
+
+        if (!isNaN(jump_index) && jump_index >= 0 && jump_index < audio_files.length) {
+            audio_index = jump_index;
+            document.getElementById('audio-container').innerHTML = '';
+            loadMoreAudio();
+        } else {
+            alert('请输入有效的音频索引。');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // 从localStorage中获取音频索引，如果不存在，则使用默认值0
+        audio_index = parseInt(localStorage.getItem('audio_index')) || 0;
+        audio_index -= 5;
+        if (audio_index < 0) {
+          audio_index = 0;
+        }
+        localStorage.setItem('audio_index', audio_index);
+
+
+        loadMoreAudio();
+
+        document.getElementById('load-more').addEventListener('click', function() {
+            loadMoreAudio();
+        });
+    });
+
+    function saveSelection(select) {
+        let audio_file = select.id;
+        let user_selection = select.value;
+
+        $.ajax({
+            url: "/save_selection",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                'audio_file': audio_file,
+                'user_selection': user_selection
+            }),
+            success: function (response) {
+                console.log("选择已保存");
+            },
+            error: function (response) {
+                console.log("保存失败");
+            }
+        });
+    }
+</script>
+</body>
+</html>
