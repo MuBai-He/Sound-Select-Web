@@ -1,0 +1,38 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+#load-more {
+  display: block; /* 将按钮转换为块级元素 */
+  margin: 0 auto; /* 将左右外边距设置为 auto，使其水平居中 */
+  text-align: center; /* 将文本居中对齐 */
+}
+.mt-3.d-flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#jump-to-index {
+    margin-right: 10px;
+}
+
+#jump {
+    margin-left: 10px;
+}
+
+<style>
+    .option-container {
+        margin-right: 15px;
+        display: inline-block;
+    }
+</style>

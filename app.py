@@ -17,7 +17,8 @@ if not os.path.exists(csv_file):
 
 @app.route('/')
 def index():
-    return render_template('index.html', audio_files=audio_files, options=options)
+
+    return render_template(html, audio_files=audio_files, options=options)
 
 @app.route('/load_more', methods=['POST'])
 def load_more():
@@ -51,4 +52,6 @@ def save_selection():
     return jsonify({'result': 'success'})
 
 if __name__ == '__main__':
+    #html = 'index_Combobox.html'
+    html = 'index_Radiobox.html'
     app.run(debug=False,host='0.0.0.0',port=5000)
