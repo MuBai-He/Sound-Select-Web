@@ -7,7 +7,6 @@ A labeling system trained by multi-user use a selection box to select speakers i
 This warehouse is to help sound trainers better organize sound sources and support multi-user annotation at the same time. Web pages support jumping, saving the current location, and limiting the number of loads.
 
 现在已经更新两种版本了，一种是下拉框，一种是单选框。
-
 Two versions have now been updated, one is a drop-down box and the other is a radio box.
 
 ![1683474282989](https://user-images.githubusercontent.com/51275418/236687915-4ee16a7e-9281-431a-b8d9-ce012dbaec8d.png)
